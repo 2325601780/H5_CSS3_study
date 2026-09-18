@@ -3,7 +3,7 @@
 - 增: push,unshift,splice(原地修改),解构,concat
 - 删: pop,shift,splice,slice
 - 改:
-- 查: indexOf,LastIndexOf,find,findIndex,includes
+- 查: indexOf,lastIndexOf,find,findIndex,includes
 - 遍历: forEach,map,filter,some,every,reduce,reduceRight
 - 其他: sort,reverse,toReversed,toString,join,flat
 
@@ -12,7 +12,7 @@
 - 增: concat
 - 删: slice,substring
 - 改: replace,trim,trimStart,trimEnd,padStart,padEnd,toLowerCase,toUpperCase
-- 查: indexOf,LastIndexOf,includes,startsWith,endsWith
+- 查: indexOf,lastIndexOf,includes,startsWith,endsWith
 - 其他: split,match,search
 
 # 3. 谈一谈JS中的类型转换机制
@@ -82,10 +82,6 @@
     1. 封装模块
     2. 防抖节流
 
-//天使轮 a b
-//100-499
-
-//沟通过500家10来场面试
 
 # 7. 说说你对js作用域的理解
   - 是什么
@@ -132,3 +128,67 @@
     3. 使用call,apply,bind方法可以改变函数的this指向  --- 显式绑定规则
     4. new 绑定：函数被new调用时，this指向新创建的对象实例
     5. 箭头函数没有自己的this, 写在箭头函数中的this也是他外层那个非箭头函数的this
+
+# 11. 说一说js中的事件模型（事件流）
+  - 是什么
+    事件流是指事件在浏览器中传播的路径，分为捕获阶段、目标阶段、冒泡阶段
+
+  - 特点
+    1. 捕获阶段：事件从window上往内层元素传播，直到目标元素
+    2. 目标阶段：事件到达目标元素，触发事件
+    3. 冒泡阶段：事件从目标元素往外层元素传播，直到window  e.stopPropagation()可以阻止事件流传播
+
+    * 阻止事件流的传播
+      1. e.stopPropagation() 
+      2. e.stopImmediatePropagation()  不仅能阻止事件流的传播，还能阻止同一元素上的其他事件
+
+  - 应用场景
+    事件委托：借助冒泡机制将原本应该在每个子元素上绑定的事件的场景，转换为给父元素上绑定事件的
+
+# 12. 说说js怎么做类型判断的
+  1. typeof 能准确判断除了null之外的所有原始类型，判断引用类型时，返回object，函数返回function --- 判断原理：将值转换为二进制，判断前三位是否为000，如果是，就返回object
+
+  2. instanceof 能准确判断引用类型的实例是否隶属于某个构造函数 --- 判断原理：判断实例的隐式原型是否等于构造函数的显示原型，如果是，就返回true，否则就顺着隐式原型链查找，直到找到null为止
+
+  3. Object.prototype.toString.call(a)
+    Object.prototype.toString --- 会返回一个由 '[object' + [[class]] + ']' 组成的字符串
+  
+  4. Array.isArray() 能准确判断数组类型
+
+  5. constructor 因为js中的实例对象都有constructor属性，它记录的是它由哪个构造函数创建的，所以可以通过判断constructor属性是否等于构造函数来判断实例对象的类型
+
+# 13. 说说你对js中事件循环机制的理解
+  - 是什么
+    因为js是默认单线程运行的，同一时间只能执行一个任务，所以一旦碰到需要耗时的异步任务就会阻塞代码的执行，所以js中引入了事件循环机制，来解决异步任务的问题。
+
+  - Event Loop
+    异步任务分为宏任务和微任务
+    1. 宏任务：script,setTimeout,setInterval,I/O操作,UI渲染,MessageChannel
+    2. 微任务：Promise.then,MutationObserver,proxy,process.nextTick
+
+  - 流程
+    1. 执行同步任务（宏任务的开始）
+    2. 执行过程中遇到宏任务或者微任务，就将它们加入到宏任务队列或微任务队列中
+    3. 等到同步任务结束，就将微任务取出来执行
+    4. 有需要的话就渲染UI
+    5. 再将宏任务取出来执行（下一次循环开始）
+
+# 14. js中函数缓存如何实现，有什么应用场景
+  - 是什么
+    将函数运算的结果进行缓存，本质上就是用空间换时间
+  - 特点
+    1. 用闭包的方式实现缓存
+    2. 柯里化：借助柯里化可以将一个接受多个参数的函数转换为多个只接受一个参数的函数，每个函数只接受一个参数，返回值是一个函数，直到所有参数都被传递，才会返回最终的结果。
+
+  - 应用场景
+    1. 对于有昂贵计算的函数，缓存函数可以大大减少重复的计算过程
+
+# 15. 说说怎么解决js中精度丢失的问题
+  - 是什么
+    js中的浮点数采用 IEEE754标准，带来的是64为双精度存储，其中52位用于存储小数部分，11位用于存储指数部分，还有一位用于存储符号
+
+    当浮点数转成二进制后是无限循环的值或者无限不循环的值，计算机会直接保留64位总长度，导致精度丢失
+
+  - 解决方案
+    1. × 10**n  将浮点数乘以10的n次方，将小数部分转换为整数部分，再除以10的n次方，即可得到精确的结果
+    2. 如果超出最大安全值，会自动转换为字符串再进行计算

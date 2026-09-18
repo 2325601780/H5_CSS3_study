@@ -8,7 +8,7 @@ const user = {
 function deepCopy(obj) {
     const newObj = Array.isArray(obj) ? [] : {}
     for (const key in obj){
-        if (obj.hasOwnProperty(key)){
+        if (obj.hasOwnProperty(key)){       //过滤掉原型链上的属性
             //newObj[key] = obj[key]
 
             if (typeof obj[key] === 'object' && obj[key] !== null) {
