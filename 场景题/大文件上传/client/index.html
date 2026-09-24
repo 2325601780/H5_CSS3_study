@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>大文件上传</title>
+</head>
+<body>
+    <h1>大文件上传</h1>
+    <input type="file" id="fileInput">
+    <button id="uploadBtn">上传</button>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const uploadBtn = document.getElementById('uploadBtn');
+
+        let fileObj = null;
+
+        uploadBtn.addEventListener('click', handleUpload)
+        fileInput.addEventListener('change', handleChange)
+        function handleUpload() {
+            if (!fileObj) {
+                alert('请选择文件');
+                return;
+            }
+            const chunkList = createChunks(fileObj);
+            const chunks = chunkList.map(({file},index) => {
+                return {
+                    file,
+                    size:file.size,
+                    chunkName:`${fileObj.name}-${index}`,
+                    fileName:fileObj.name,
+                    index,
+                }
+            });
+            uploadChunks(chunks);
+        }
+
+        function uploadChunks(chunks){
+            //将切片处理成16进制
+            const formChunks = chunks.map(({file,size,chunkName,fileName,index})=>{
+                const formData = new FormData();
+                formData.append('file',file);
+                formData.append('chunkName',chunkName);
+                formData.append('fileName',fileName);
+                return {formData,index};
+            })
+            // console.log(formChunks);
+            const requestList = formChunks.map(({formData,index})=>{
+                return axios.post('http://localhost:3000/upload',formData)
+            })
+            Promise.all(requestList).then(res => {
+                axios.post('http://localhost:3000/merge',{
+                    fileName: fileObj.name,
+                    size: 5*1024*1024,
+                }).then(res => {
+                    console.log(res);
+                })
+            })
+        }
+
+        function createChunks(file,size = 5*1024*1024) {
+            const chunkList = [];
+            let cur =0 
+            while(cur<file.size) {
+                const chunk = file.slice(cur,cur+size);
+                chunkList.push({"file":chunk});
+                cur += size;
+            }
+            return chunkList;
+        }
+
+        function handleChange(e) {
+            const file = e.target.files[0];
+            if (!file) {
+                return;
+            }
+            fileObj = file;
+        }
+
+
+    </script>
+</body>
+</html>
