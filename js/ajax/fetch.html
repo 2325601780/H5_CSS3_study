@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <button id="btn">获取歌手信息</button>
+    <ul id="list">
+        <!-- <li>许嵩</li> -->
+    </ul>
+    <script>
+        let btn = document.getElementById('btn')
+        btn.addEventListener('click',() => {
+            fetch('https://mock.mengxuegu.com/mock/6ae01c2c51118a1b6b95cac3/example/songer', {
+                method: 'GET'           
+            }).then((res) => {
+                return res.json()
+            }).then((data) => {
+                console.log(data);
+                
+            })
+        })
+    </script>
+</body>
+</html>
